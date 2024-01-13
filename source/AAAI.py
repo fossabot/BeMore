@@ -35,6 +35,8 @@ class AAAISpider(scrapy.Spider):
             "url": response.css("a.pdf::attr(href)").get(),
             "keywords": response.css("section.keywords span.value::text")
             .get()
-            .replace("\t", ""),
+            .replace("\t", "")
+            .replace("\n", "")
+            .split(", "),
             "authors": strlist_to_str(response.css("span.name::text").getall()),
         }

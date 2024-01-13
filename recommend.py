@@ -31,6 +31,8 @@ candidate_labels = [
     "Distributional Reinforcement Learning",
     "Parameter efficient fine-tuning",
     "Distillation methods",
+    "Reinforcement Learning",
+    "Multimodal",
 ]
 
 
@@ -39,7 +41,7 @@ output_json = {}
 with open("arxiv.json") as f:
     data: List[Dict] = json.load(f)
     for item in tqdm(data):
-        abstract: str = item["title"] + ": " + item["abstract"]
+        abstract: str = item["title"] + ": " + item["abstract"].replace("\n", " ")
         output = classifier(abstract, candidate_labels, multi_label=True)
         if np.all(np.array(output["scores"]) < 0.5):  # type: ignore
             offset_sample.append(
@@ -51,10 +53,10 @@ with open("arxiv.json") as f:
             continue  # The sample is controversial
 
         try:
-            output_json[output["labels"][0]].append({"sequence": output["sequence"], "score": output["scores"][0]})  # type: ignore
+            output_json[output["labels"][0]].append({"url": item["url"], "sequence": output["sequence"], "score": output["scores"][0]})  # type: ignore
         except KeyError:
             output_json[output["labels"][0]] = [  # type: ignore
-                {"sequence": output["sequence"], "score": output["scores"][0]}  # type: ignore
+                {"url": item["url"], "sequence": output["sequence"], "score": output["scores"][0]}  # type: ignore
             ]
 
 with open("offset_sample.json", "w") as f:
